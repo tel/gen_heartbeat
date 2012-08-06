@@ -1,0 +1,10 @@
+%%-*- mode: erlang -*-
+{application, frontline,
+ [{description, "servers for repeatedly doing something"},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]}
+ ]}.
