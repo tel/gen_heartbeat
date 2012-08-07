@@ -128,7 +128,6 @@ force(Server) -> Server ! beat, ok.
 -spec
 inspect(Server :: server()) -> 
     {ok, {Name :: binary(), 
-          ToNext :: pos_integer(), 
           Period :: pos_integer(), 
           Pid :: pid(), 
           StateDescription :: _}}. 
@@ -144,7 +143,7 @@ inspect(Server) -> gen_server:call(Server, inspect).
 init([Module, Args]) ->
     {Period, State, Opts} = do_init(Module:init(Args)),
     Type = proplists:get_value(type, Opts, parallel),
-    Name = proplists:get_value(name, Opts, <<"a gen_heartbeat server">>),
+    Name = proplists:get_value(name, Opts, <<"gen_heartbeat">>),
     {ok, TRef} = timer:send_after(Period, beat),
     {ok, #st{module = Module,
              state  = State,
@@ -168,6 +167,13 @@ terminate(Reason, #st{tref = TRef, module = Module, state = MState}) ->
     {ok, cancel} = timer:cancel(TRef),
     ok.
 
+handle_call(inspect, _From, 
+            State = #st{module = Module, 
+                        state = MState,
+                        period = Period,
+                        name = Name}) ->
+    S = Module:inspect(MState),
+    {reply, {Name, Period, self(), S}, State};
 handle_call({stop, user}, _From, State) -> {stop, {shutdown, user}, stopped, State};
 handle_call(stop, _From, State) -> {stop, normal, stopped, State};
 handle_call(_Msg, _From, State) -> {reply, ignored, State}.
@@ -219,10 +225,10 @@ eval_beat(State = #st{name = Name, module = Module, state = MState0}) ->
                 {RTime/1000, State#st{state = MState1}}
         end,
     lager:info("~s: heatbeat in ~fms", [Name, MsTime]),
-    % zeta:cvh(["heartbeat beat_time"], MsTime),
+    zeta:cvh(binary_to_list(<<Name/binary, " beat_time">>), MsTime),
     {ok, NewState}.
 
-eval_beat_async(State = #st{type = Type}) ->
+eval_beat_async(State) ->
     Parent = self(),
     erlang:spawn_link(
       fun () ->
