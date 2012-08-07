@@ -214,15 +214,15 @@ eval_beat(State = #st{name = Name, module = Module, state = MState0}) ->
     {MsTime, NewState} = 
         case timer:tc(Module, beat, [MState0]) of
             {RTime, ok} -> 
-                {RTime*1000, State};
+                {RTime/1000, State};
             {RTime, MState1} ->
-                {RTime*1000, State#st{state = MState1}}
+                {RTime/1000, State#st{state = MState1}}
         end,
-    lager:info("~s: heatbeat in ~bms", [Name, MsTime]),
+    lager:info("~s: heatbeat in ~fms", [Name, MsTime]),
     % zeta:cvh(["heartbeat beat_time"], MsTime),
     {ok, NewState}.
 
-eval_beat_async(State) ->
+eval_beat_async(State = #st{type = Type}) ->
     Parent = self(),
     erlang:spawn_link(
       fun () ->
