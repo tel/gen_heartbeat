@@ -1,5 +1,5 @@
 %%-*- mode: erlang -*-
-{application, frontline,
+{application, gen_heartbeat,
  [{description, "servers for repeatedly doing something"},
   {vsn, git},
   {registered, []},
