@@ -1,8 +1,8 @@
-# ``gen_heartbeat'': a little server for repeating events
+# `gen_heartbeat`: a little server for repeating events
 
-For times when ```timer:send_after''' needs a bit more supervision.
+For times when `timer:send_after` needs a bit more supervision.
 
-Suppose we have ```a_module.erl'''
+Suppose we have `a_module.erl`
 
 ```erlang
 -module(a_module).
